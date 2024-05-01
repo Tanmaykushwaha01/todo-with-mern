@@ -1,34 +1,47 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useEffect, useState } from 'react';
+import ToDo from "./components/ToDo";
+import axios from "axios";
+import { baseURL } from './utils/constant';
 
-function App() {
-  const [count, setCount] = useState(0)
+const App = () => {
+ const [toDos, setToDos] = useState([]); 
+  const [input, setInput] = useState("");
+  const [updateUI, setUpdateUI] = useState(false);
 
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+ useEffect(() => {
+  axios.get(`${baseURL}/get`)
+  .then((res) => setToDos(res.data))
+  .catch((err) => console.log(err));
+}, [updateUI]);
+
+ const saveToDo = () => {
+    axios
+      .post(`${baseURL}/save`, { toDo: input })
+      .then((res) => {
+        console.log(res.data);
+        setUpdateUI((prevState) => !prevState);  
+        setInput("");
+      })
+      .catch((err) => console.log(err));
+  };
+
+return (
+    <main>
+      <div className="container">
+        <h1 className="title">ToDo App</h1>
+
+        <div className='input_holder'>
+            <input value={input} onChange={(e) => setInput(e.target.value)} type="text"placeholder="Add a Todo..." />
+            <button  onClick={saveToDo}>Add</button>
+        </div>
+
+        <div className='list'>
+          {console.log(toDos)}
+          {toDos && toDos.map(el => <ToDo key={el._id} text={el.todo} />)}
+         
+        </div>
+    </div>
+    </main>
   )
 }
 
